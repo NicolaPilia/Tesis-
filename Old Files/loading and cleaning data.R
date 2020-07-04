@@ -12,8 +12,8 @@ pros<-data$pros
 
 #Converting foreign characters into english
 library(gsubfn)
-data<-gsub("Ç","c",data)
-data<-gsub("¸",",",data)
+data<-gsub("Ã‡","c",data)
+data<-gsub("Â¸",",",data)
 data<-gsub("f","f",data)
 View(summ)
 
