@@ -30,6 +30,7 @@ pros<-gsub("½","",pros)
 pros<-pros[-c(809,810)]
 cons<-cons[-c(809,810)]
 
+
 #creating Corpus
 library(tm)
 corp_p<-Corpus(VectorSource(pros))
@@ -53,9 +54,20 @@ corp_c<-tm_map(corp_c, removeWords,stopwords("english"))
 corp_p<-tm_map(corp_p,stemDocument)
 corp_c<-tm_map(corp_c,stemDocument)
 
+View(corp_c$content)
+corp_c$content<- str_replace_all(corp_c$content, "(\\b\\w)", 'C_\\1')
+corp_p$content<- str_replace_all(corp_p$content, "(\\b\\w)", 'P_\\1')
+corp<-corp_c
+
+corp$content<-paste(corp_c$content,corp_p$content)
+View(corp$content)
+
+
 #creating TermDocumentMatrix
 tdm_p<-TermDocumentMatrix(corp_p)
 tdm_c<-TermDocumentMatrix(corp_c)
+
+tdm<-TermDocumentMatrix(corp)
 
 
 #modifing words to differentiate between positive and negative terms.
@@ -67,13 +79,16 @@ tfidf_c<-weightTfIdf(tdm_c)
 tfidf_p<-weightTfIdf(tdm_p)
 inspect(tfidf_c)
 
-
+tfidf<- weightTfIdf(tdm)
 #TF-IDF and latent semantic analysis
 
 library(lsa)
 lsa.tfidf_c<-lsa(tfidf_c,dim=20)
 lsa.tfidf_p<-lsa(tfidf_p,dim=20)
+lsa.tfidf<-lsa(tfidf,dim=20)
 
 words.df_c<-as.data.frame(as.matrix(lsa.tfidf_c$dk))
 words.df_p<-as.data.frame(as.matrix(lsa.tfidf_p$dk))
 
+words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
+View(words.df)
