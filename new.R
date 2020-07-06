@@ -13,16 +13,18 @@ kfold_LSA<-function(y){
 df<-data.frame(matrix(nrow=22, ncol=20))
 
 Kfold_6<-kfold_LSA(6)
-rbind(df,6)<-Kfold_6$results[1,]
-View(df)
+df[6,]<-Kfold_6
+
 
 require(rbind)
 
-Lsa_results_vector<-
+K_fold_df<-
 for(i in 1:20){
   Kfold_i<-kfold_LSA(i)
-  df[i,]<-Kfold_i$results[1,]
+  df[i,]<-Kfold_i
+  View(df)
 }
+names(df)<-colnames(mod_fit$results)
 
 
 words.df_5<-as.data.frame(as.matrix(lsa_5$dk))
@@ -52,3 +54,5 @@ View(mod_fit$results)
 
 rbind(mod_fit$metric,0)
 ls(mod_fit$results)
+
+colnames(mod_fit$results)
