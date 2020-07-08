@@ -4,7 +4,14 @@ data<- read.csv("netflix.csv", header =TRUE, sep=";")
 #Viewing complete dataset
 View(data)
 #str(data)
-data<-data[-c(809,810),]
+#Translating French observations
+levels(data$pros) <- c(levels(data$pros), "Pleasant Hobby Free choice Great quality Languages","Learn to work on pressure. Personal development, team spirit, enthusiasm")
+data[810,"pros"]<-"Pleasant Hobby Free choice Great quality Languages"
+data[809,"pros"]<-"Learn to work on pressure. Personal development, team spirit, enthusiasm"
+levels(data$cons) <- c(levels(data$cons), "I do not know it","Stimulate to do much more than before")
+data[810,"cons"]<-"I do not know it"
+data[809,"cons"]<-"Stimulate to do much more than before"
+
 #Separating text variables to other variables
 cons<-data$cons
 pros<-data$pros
@@ -13,6 +20,7 @@ View(pros)
 
 #Converting foreign characters into english and dropping french rows
 library(gsubfn)
+
 cons<-gsub("Ç","c",cons)
 cons<-gsub("¸",",",cons)
 cons<-gsub("ƒ","f",cons)
@@ -26,10 +34,6 @@ pros<-gsub("ƒ","f",pros)
 pros<-gsub("ÿ","y",pros)
 pros<-gsub("¶","",pros)
 pros<-gsub("½","",pros)
-
-pros<-pros[-c(809,810)]
-cons<-cons[-c(809,810)]
-
 
 #creating Corpus
 library(tm)
@@ -55,52 +59,33 @@ corp_p<-tm_map(corp_p,stemDocument)
 corp_c<-tm_map(corp_c,stemDocument)
 
 View(corp_c$content)
+
+#modifing words to differentiate between positive and negative terms and unify the two variables, pros and cons, in the same variable.
 library(stringr)
 corp_c$content<- str_replace_all(corp_c$content, "(\\b\\w)", 'C_\\1')
 corp_p$content<- str_replace_all(corp_p$content, "(\\b\\w)", 'P_\\1')
 corp<-corp_c
-
 corp$content<-paste(corp_c$content,corp_p$content)
 View(corp$content)
 
-
 #creating TermDocumentMatrix
-tdm_p<-TermDocumentMatrix(corp_p)
-tdm_c<-TermDocumentMatrix(corp_c)
-
 tdm<-TermDocumentMatrix(corp)
 
-
-#modifing words to differentiate between positive and negative terms.
-tdm_p$dimnames$Terms <- paste0("P_",tdm_p$dimnames$Terms)
-tdm_c$dimnames$Terms <- paste0("C_",tdm_c$dimnames$Terms)
-
 #TF-IDF
-tfidf_c<-weightTfIdf(tdm_c)
-tfidf_p<-weightTfIdf(tdm_p)
-inspect(tfidf_c)
-
 tfidf<- weightTfIdf(tdm)
 
 View(tfidf$dimnames$Terms)
-#TF-IDF and latent semantic analysis with 20 components
 
+#TF-IDF and latent semantic analysis with 6 components (the evaluation of the optimal number of
+# LSA component is in the notebook called "CV for LSA")
 library(lsa)
-lsa.tfidf_c<-lsa(tfidf_c,dim=20)
-lsa.tfidf_p<-lsa(tfidf_p,dim=20)
-
-lsa.tfidf<-lsa(tfidf,dim=20)
-
-words.df_c<-as.data.frame(as.matrix(lsa.tfidf_c$dk))
-words.df_p<-as.data.frame(as.matrix(lsa.tfidf_p$dk))
+lsa.tfidf<-lsa(tfidf,dim=6)
 
 words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
 View(words.df)
 
 #Moving LSA to excel
-write.table(words.df, file="LSA.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
-
-
+write.table(words.df, file="LSA_6.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 #Implementing the logistic regression model
 #aggiungo una colonna e rendo binaria la variabile overall rating

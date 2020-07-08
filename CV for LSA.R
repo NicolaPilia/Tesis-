@@ -30,7 +30,7 @@ df[,1]<-1:20
 colnames(df)[1]<-"number of LSA"
 
 #Creating the plot for the LSA CV
-plot(df$number_of_LSA,df$Accuracy,type='l',xaxt='n',xlab = "Number of LSA", ylab="Accuracy",ylim = c(0.6,0.85), lwd=2, col="blue")
+plot(df$number_of_LSA,df$Accuracy,type='l',xaxt='n',xlab = "Number of LSA", ylab="Metrics",ylim = c(0.6,0.85), lwd=2, col="blue", main = "Figure: 1")
 lines(df$number_of_LSA,df$Spec,col="green", lwd=2,)
 lines(df$number_of_LSA,df$Sens,col="red", lwd=2)
 legend("bottomright",legend=c("Accuracy","Specificity","Sensitivity"), col=c("blue","green","red"),pch = c(20,20,20), bty="n")
