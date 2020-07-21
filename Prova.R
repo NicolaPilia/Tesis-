@@ -260,5 +260,9 @@ abline(h=6, v=6, col="gray47", lty=3)
 library(randomForest)
 #creating a df with separate words and making some adjustments
 rf.df<-as.data.frame(as.matrix(tfidf))
-rf.df<-t(rf.df)
-rf.df[over.b]<-data$over.b      
+rf.df<-as.data.frame(t(rf.df))
+rf.output<-as.factor(data$over.b)
+
+
+rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
+View(rf.train)
