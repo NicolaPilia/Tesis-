@@ -263,6 +263,19 @@ rf.df<-as.data.frame(as.matrix(tfidf))
 rf.df<-as.data.frame(t(rf.df))
 rf.output<-as.factor(data$over.b)
 
-
+rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=74 , importance=TRUE)
 rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
-View(rf.train)
+#variable importance
+importance(rf.model)
+
+
+rf.ValidData<-rf.df[-training,]
+rf.pred<-predict(rf.model,newdata=rf.ValidData,type='response')
+rf.confmat<-confusionMatrix(rf.pred,rf.output[-training])
+
+rf.ValidData2<-rf.df[training,]
+rf.pred2<-predict(rf.model,newdata=rf.ValidData2,type='response')
+rf.confmat2<-confusionMatrix(rf.pred2,rf.output[training])
+
+rf.output<-make.names(rf.output)
+rf.model_cv <- train(y=rf.output,x=rf.df,method = "rf",trControl = ctrl)
