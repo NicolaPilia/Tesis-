@@ -87,6 +87,8 @@ View(words.df)
 
 #Moving LSA to excel
 write.table(words.df, file="LSA_6.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
+lsa_inter<-as.data.frame(as.matrix(lsa.tfidf$tk))
+write.table(lsa_inter, file="LSA_I.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 #Implementing the logistic regression model
 #aggiungo una colonna e rendo binaria la variabile overall rating
@@ -279,3 +281,5 @@ rf.confmat2<-confusionMatrix(rf.pred2,rf.output[training])
 
 rf.output<-make.names(rf.output)
 rf.model_cv <- train(y=rf.output,x=rf.df,method = "rf",trControl = ctrl)
+
+
