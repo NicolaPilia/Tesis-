@@ -266,20 +266,39 @@ rf.df<-as.data.frame(t(rf.df))
 rf.output<-as.factor(data$over.b)
 
 rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=74 , importance=TRUE)
-rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
+#another way of doing it
+#rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
+rf.model
+#note on confusion matrix-> You have to load randomForest before launching r.model
+                            #rows are actual values and columns are predicted values
+
+#measuring oob error rate to understand if tree number is correct
+oob.error.data<-data.frame(
+  Trees=rep(1:nrow(rf.model$err.rate), times=3), 
+  Type=rep(c("OOB", "0", "1"), each=nrow(rf.model$err.rate)),
+  Error=c(rf.model$err.rate[,"OOB"],
+        rf.model$err.rate[,"0"],
+        rf.model$err.rate[,"1"]))
+
+#plotting oob error rate
+library(ggplot2)
+library(cowplot)
+
+ggplot(data=oob.error.data, aes(x=Trees,y=Error))+
+  geom_line(aes(color=Type))
+
 #variable importance
 importance(rf.model)
-
 
 rf.ValidData<-rf.df[-training,]
 rf.pred<-predict(rf.model,newdata=rf.ValidData,type='response')
 rf.confmat<-confusionMatrix(rf.pred,rf.output[-training])
 
-rf.ValidData2<-rf.df[training,]
-rf.pred2<-predict(rf.model,newdata=rf.ValidData2,type='response')
-rf.confmat2<-confusionMatrix(rf.pred2,rf.output[training])
+#rf.ValidData2<-rf.df[training,]
+#rf.pred2<-predict(rf.model,newdata=rf.ValidData2,type='response')
+#rf.confmat2<-confusionMatrix(rf.pred2,rf.output[training])
 
-rf.output<-make.names(rf.output)
-rf.model_cv <- train(y=rf.output,x=rf.df,method = "rf",trControl = ctrl)
+rf.output_cv<-make.names(rf.output)
+rf.model_cv <- train(y=rf.output_cv,x=rf.df,method = "rf",trControl = ctrl)
 
 
