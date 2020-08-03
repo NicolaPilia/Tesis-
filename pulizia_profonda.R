@@ -1,0 +1,34 @@
+words_tbdropped<-c("c_veri","c_isnt","c_con","c_i","c_work","c_netflix","c_ive","c_almost","c_littl","c_have","c_the","c_one","c_but","c_also","c_how",
+                   "c_theless","c_seen","c_wouldnt","c_even","c_mani","c_can","c_either","p_top","c_year","c_xor","c_rare","c_lot","p_great","p_pros"
+                   ,"c_week","c_thing","c_long","c_doesnt", "c_good","p_good","c_thing","c_month","c_pretti", "p_netflix", "p_mine",
+                   "c_poor","c_good","c_make","c_average","c_high","c_bad","c_great","c_anti","p_make","p_work","p_long","c_havent", "c_greater","c_dont",
+                   "p_nice","c_big","c_mention","c_lack","c_there", "p_there","c_im","p_im","c_theyr","p_theyr","c_wont","p_wont","c_youv","p_youv","c_worst","p_top","p_worst","c_top","c_depend","p_depend","c_made"
+                   ,"p_made","p_found","c_found","p_thing","p_work","p_ive","p_almost","p_littl","p_have","p_the","p_one","p_but","p_also","p_how",
+                   "p_theless","p_seen","p_wouldnt","p_even","p_mani","p_can","p_either","p_year","p_xor","p_rare","p_lot","c_great","c_pros","p_week",
+                   "p_thing","p_doesnt","p_thing","p_month","p_pretti","c_mine","p_poor","p_good","p_make","p_average","p_high","p_bad","p_great","p_anti",
+                   "c_make","p_havent","p_greater","p_dont","c_nice","p_big","p_mention","p_lack","p_tje","c_low","p_low","c_averag","p_averag","p_give","c_give","p_half","c_half","c_huge","p_huge","c_arent","p_arent","p_biggest","c_biggest",
+                   "c_bunch","p_bunch","c_cool","p_cool","c_didnt","p_didnt","c_eventu","p_eventu","c_min","p_min","c_theyv","p_theyv","c_uniqu","p_uniqu",
+                   "c_wasnt","p_wasnt","c_whove","p_whove","c_awesom","p_awesom","c_strong","p_strong","c_whatnot","p_whatnot","c_aka","p_aka","p_super","c_super",
+                   "c_hasnt","p_hasnt","c_yive","p_yive","c_greatest","p_greatest","p_youll","c_youll","c_minor","p_minor","c_youfll","p_youfll","c_put","p_put",
+                   "c_holeðÿ","c_kinda","p_kinda","c_arenft","p_arenft","c_canft","p_canft","c_doesnft","p_doesnft","c_donft","p_donft","c_fgreat","p_fgreat","c_aw","p_aw","c_tho","p_tho","c_major","c_hundr","p_hundr","c_bigger","p_bigger",
+                   "p_iffi","c_unlik","p_unlik","p_hes","c_hes","c_fewer","p_fewer","c_altogeth","p_altogeth",
+                   "c_till","p_till","c_werent","p_werent","c_cultureit","c_alram","p_slideshare","p_www","p_net","c_aint",
+                   "p_aint","c_hey","p_hey","c_whatsoev","p_whatsoev","c_shes","p_shes","c_els","p_els","p_alot","c_alot","c_alik","p_alik","p_isnt","p_theyd","c_theyd","p_jo","c_jo",
+                   "p_youd","c_youd","p_wouldv","c_wouldv","c_theyll","p_theyll","c_withi","p_withi","p_lightn","c_lightn","c_smaller","p_smaller","p_previous","c_previous",
+                   "p_small","c_small","c_implic","p_implic","p_dang","c_dang","p_numer","c_numer","p_obvious","c_obvious","p_simpl","c_simpl","c_wouldv","p_wouldv","c_ten",
+                   "p_ten","p_pure","c_pure","c_minim","p_minim","c_allllll","c_wanna","p_wanna","c_hmm","p_hmm","c_ayn","p_ayn","p_tat","c_tat","c_ago","p_ago","c_hmmm","p_hmmm",
+                   "c_fyi","p_fyi","c_shed","p_shed","p_forti","c_forti","p_gato","p_los","c_gato","c_los","p_altho","c_altho","c_longest","p_longest","c_btw","p_btw","c_nflx","p_nflx","c_yess","p_yess","c_merri","p_merri","c_larger","p_larger","c_whos","p_whos","p_anytim","c_anytim",
+                   "c_ell","p_ell","c_bammm","p_bammm","c_everyth","p_everyth","c_thirti","p_thirti","c_anymor","p_anymor","c_someth","p_someth","c_unusu","p_unusu",
+                   "c_unusu","p_unusu","c_easili","p_easili","p_lofti","c_lofti","	c_highest","p_highest","c_doubl","p_doubl","p_largest","c_largest","p_con","c_shorten","p_shorten",
+                   "c_urself","p_urself","p_mster","p_ur","c_ur","c_lowest","p_lowest","c_yeah","p_yeah","c_ax","p_ax","c_latest","p_latest","p_becasu","c_becasu","c_gurante","p_gurante",
+                   "c_somet","p_somet","c_withou","p_netlfix","p_main","c_main","c_piti","p_piti","c_mighti","p_mighti","p_dot","c_dot","c_ah","p_ah","c_yo","p_yo","p_wors","c_wors","p_substanti",
+                  "c_substanti","c_eggager","p_eggager","c_pointless","p_pointless","p_ya","c_accustom","p_accustom","p_devoid","c_devoid","p_disconcert","c_disconcert","c_duti","p_duti",
+                   "c_insent","c_outta","p_outta","c_noy","p_noy","p_chao","c_chao","p_weve","c_weve","c_bye","p_bye","p_doest","c_doest","p_okish","p_thousand","c_thousand","c_perq",
+                   "p_perq","c_xx","p_xx","c_bacaus","p_oneself","c_crappi","p_crappi","c_huh","p_huh")
+corp <- tm_map(corp, removeWords, words_tbdropped)
+corp<-tm_map(corp, stripWhitespace)
+
+tdm<-TermDocumentMatrix(corp)
+View(tdm$dimnames$Terms)
+
+

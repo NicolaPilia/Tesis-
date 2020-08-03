@@ -16,24 +16,61 @@ data[809,"cons"]<-"Stimulate to do much more than before"
 cons<-data$cons
 pros<-data$pros
 
-View(pros)
+View(cons)
 
 #Converting foreign characters into english and dropping french rows
 library(gsubfn)
 
 cons<-gsub("Ç","c",cons)
 cons<-gsub("¸",",",cons)
-cons<-gsub("ƒ","f",cons)
-cons<-gsub("ÿ","y",cons)
+cons<-gsub("ƒ"," ",cons)
+cons<-gsub("ÿ","",cons)
 cons<-gsub("¶","",cons)
 cons<-gsub("½","",cons)
+cons<-gsub("","",cons)
+cons<-gsub("ù","",cons)
+cons<-gsub("/"," ",cons)
+cons<-gsub("-"," ",cons)
+cons<-gsub("[.]"," ",cons)
+cons<-gsub(","," ",cons)
+cons<-gsub("[+]"," ",cons)
+cons<-gsub("ý","",cons)
+cons<-gsub("<","",cons)
+cons<-gsub("[(]"," ",cons)
+cons<-gsub("sloooooow","slow",cons)
+cons<-gsub("guis","guys",cons)
+cons<-gsub("ppl","people",cons)
+cons<-gsub("mgr","manager",cons)
+cons<-gsub("manger","manager",cons)
+cons<-gsub("guage","gauge",cons)
+cons<-gsub("imposssible","impossible",cons)
+cons<-gsub("disscussion","discussion",cons)
+cons<-gsub("employess","employees",cons)
+cons<-gsub("insufficiect","insufficient",cons)
+cons<-gsub("mgt","management",cons)
+cons<-gsub("WIshy washy","wishiwashy",cons)
 
 pros<-gsub("Ç","c",pros)
 pros<-gsub("¸",",",pros)
-pros<-gsub("ƒ","f",pros)
-pros<-gsub("ÿ","y",pros)
+pros<-gsub("ƒ"," ",pros)
+pros<-gsub("ÿ","",pros)
 pros<-gsub("¶","",pros)
+pros<-gsub("","",pros)
 pros<-gsub("½","",pros)
+pros<-gsub("ù","",pros)
+pros<-gsub("/"," ",pros)
+pros<-gsub("-"," ",pros)
+pros<-gsub("[.]"," ",pros)
+pros<-gsub(","," ",pros)
+pros<-gsub("[+]"," ",pros)
+pros<-gsub("ý","",pros)
+pros<-gsub("<","",pros)
+pros<-gsub("[(]"," ",pros)
+pros<-gsub("ppl","people",pros)
+pros<-gsub("saavy","savvy",pros)
+pros<-gsub("mgr","manager",pros)
+pros<-gsub("Cluture","culture",pros)
+pros<-gsub("prettt","pretty",pros)
 
 #creating Corpus
 library(tm)
@@ -45,34 +82,49 @@ corp_c<-Corpus(VectorSource(cons))
 corp_p<-tm_map(corp_p, stripWhitespace)
 corp_p<-tm_map(corp_p, removePunctuation)
 corp_p<-tm_map(corp_p, removeNumbers)
+corp_p<-tm_map(corp_p, tolower)
 
 corp_c<-tm_map(corp_c, stripWhitespace)
 corp_c<-tm_map(corp_c, removePunctuation)
 corp_c<-tm_map(corp_c, removeNumbers)
+corp_c<-tm_map(corp_c, tolower)
 
 #removing stopwords
 corp_p<-tm_map(corp_p, removeWords,stopwords("english"))
 corp_c<-tm_map(corp_c, removeWords,stopwords("english"))
+corp_p<-tm_map(corp_p, removeWords,stopwords("SMART"))
+corp_c<-tm_map(corp_c, removeWords,stopwords("SMART"))
 
 #stemming the corpuses
 corp_p<-tm_map(corp_p,stemDocument)
 corp_c<-tm_map(corp_c,stemDocument)
 
-View(corp_p$content)
+#re-removing stopwords using SMART
+corp_p<-tm_map(corp_p, removeWords,stopwords("SMART"))
+corp_c<-tm_map(corp_c, removeWords,stopwords("SMART"))
+
+View(corp_c$content)
 
 #modifing words to differentiate between positive and negative terms and unify the two variables, pros and cons, in the same variable.
 library(stringr)
-corp_c$content<- str_replace_all(corp_c$content, "(\\b\\w)", 'C_\\1')
-corp_p$content<- str_replace_all(corp_p$content, "(\\b\\w)", 'P_\\1')
+corp_c$content<- str_replace_all(corp_c$content, "(\\b\\w)", 'c_\\1')
+corp_p$content<- str_replace_all(corp_p$content, "(\\b\\w)", 'p_\\1')
 corp<-corp_c
 corp$content<-paste(corp_c$content,corp_p$content)
 View(corp$content)
 
+
 #creating TermDocumentMatrix
 tdm<-TermDocumentMatrix(corp)
-
+View(tdm$dimnames$Terms)
 #TF-IDF
 tfidf<- weightTfIdf(tdm)
+
+#dropping empty documents
+colTotals <- apply(tfidf , 2, sum)
+tfidf <- tfidf[ , colTotals> 0]
+
+#converting to dataframe
 tfidf_df<-as.data.frame(as.matrix(tfidf))
 
 View(tfidf$dimnames$Terms)
@@ -103,7 +155,7 @@ training
 
 #run logistic model on training
 trainData = cbind(label=data$over.b[training],words.df[training,])
-reg<-glm(label ~V1+V4+V5+V6,data=trainData, family='binomial')
+reg<-glm(label~V1+V4+V5+V6,data=trainData, family='binomial')
 summary(reg)
 
 #compute accuracy on validation set
@@ -171,7 +223,7 @@ ctrl <- trainControl(method = "cv",number = 10,savePredictions = TRUE, summaryFu
 
 df<-data.frame(matrix(nrow=20, ncol=19))
 #traing the model and looking at the results.
-mod_fit <- train(output~V1+V4+V5+V6,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
+mod_fit <- train(output~.,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
 mod_fit$results
 View(mod_fit$results)
 
