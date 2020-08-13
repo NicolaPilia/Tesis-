@@ -24,7 +24,7 @@ words_tbdropped<-c("c_veri","c_isnt","c_con","c_i","c_work","c_netflix","c_ive",
                    "c_somet","p_somet","c_withou","p_netlfix","p_main","c_main","c_piti","p_piti","c_mighti","p_mighti","p_dot","c_dot","c_ah","p_ah","c_yo","p_yo","p_wors","c_wors","p_substanti",
                   "c_substanti","c_eggager","p_eggager","c_pointless","p_pointless","p_ya","c_accustom","p_accustom","p_devoid","c_devoid","p_disconcert","c_disconcert","c_duti","p_duti",
                    "c_insent","c_outta","p_outta","c_noy","p_noy","p_chao","c_chao","p_weve","c_weve","c_bye","p_bye","p_doest","c_doest","p_okish","p_thousand","c_thousand","c_perq",
-                   "p_perq","c_xx","p_xx","c_bacaus","p_oneself","c_crappi","p_crappi","c_huh","p_huh")
+                   "p_perq","c_xx","p_xx","c_bacaus","p_oneself","c_crappi","p_crappi","c_huh","p_huh","p_compani","c_compani")
 corp <- tm_map(corp, removeWords, words_tbdropped)
 corp<-tm_map(corp, stripWhitespace)
 

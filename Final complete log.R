@@ -36,17 +36,18 @@ cons<-gsub("ý","",cons)
 cons<-gsub("<","",cons)
 cons<-gsub("[(]"," ",cons)
 cons<-gsub("sloooooow","slow",cons)
-cons<-gsub("guis","guys",cons)
-cons<-gsub("ppl","people",cons)
-cons<-gsub("mgr","manager",cons)
-cons<-gsub("manger","manager",cons)
-cons<-gsub("guage","gauge",cons)
+cons<-gsub("\\bguis\\b","guys",cons)
+cons<-gsub("\\bppl\\b","people",cons)
+cons<-gsub("\\bmgr\\b","manager",cons)
+cons<-gsub("\\bmanger\\b","manager",cons)
+cons<-gsub("\\bguage\\b","gauge",cons)
 cons<-gsub("imposssible","impossible",cons)
 cons<-gsub("disscussion","discussion",cons)
 cons<-gsub("employess","employees",cons)
 cons<-gsub("insufficiect","insufficient",cons)
-cons<-gsub("mgt","management",cons)
+cons<-gsub("\\bmgt\\b","management",cons)
 cons<-gsub("WIshy washy","wishiwashy",cons)
+cons<-gsub("\\bmgmt\\b","management",cons)
 
 pros<-gsub("Ç","c",pros)
 pros<-gsub("¸",",",pros)
@@ -64,11 +65,12 @@ pros<-gsub("[+]"," ",pros)
 pros<-gsub("ý","",pros)
 pros<-gsub("<","",pros)
 pros<-gsub("[(]"," ",pros)
-pros<-gsub("ppl","people",pros)
-pros<-gsub("saavy","savvy",pros)
-pros<-gsub("mgr","manager",pros)
-pros<-gsub("Cluture","culture",pros)
-pros<-gsub("prettt","pretty",pros)
+pros<-gsub("\\bppl\\b","people",pros)
+pros<-gsub("\\bsaavy\\b","savvy",pros)
+pros<-gsub("\\bmgr\\b","manager",pros)
+pros<-gsub("\\bCluture\\b","culture",pros)
+pros<-gsub("\\bprettt\\b","pretty",pros)
+pros<-gsub("\\bmgmt\\b","management",pros)
 
 #creating Corpus
 library(tm)
@@ -101,31 +103,26 @@ corp_c<-tm_map(corp_c,stemDocument)
 corp_p<-tm_map(corp_p, removeWords,stopwords("SMART"))
 corp_c<-tm_map(corp_c, removeWords,stopwords("SMART"))
 
-View(corp_c$content)
-
 #modifing words to differentiate between positive and negative terms and unify the two variables, pros and cons, in the same variable.
 library(stringr)
 corp_c$content<- str_replace_all(corp_c$content, "(\\b\\w)", 'c_\\1')
 corp_p$content<- str_replace_all(corp_p$content, "(\\b\\w)", 'p_\\1')
 corp<-corp_c
 corp$content<-paste(corp_c$content,corp_p$content)
-View(corp$content)
 
+corp <- tm_map(corp, removeWords, pulizia2)
+corp<-tm_map(corp, stripWhitespace)
 
-#creating TermDocumentMatrix
 tdm<-TermDocumentMatrix(corp)
-View(tdm$dimnames$Terms)
+
 #TF-IDF
 tfidf<- weightTfIdf(tdm)
-
-#dropping empty documents
-colTotals <- apply(tfidf , 2, sum)
-tfidf <- tfidf[ , colTotals> 0]
 
 #converting to dataframe
 tfidf_df<-as.data.frame(as.matrix(tfidf))
 
-View(tfidf$dimnames$Terms)
+#dropping empty documents
+tfidf_df<-tfidf_df[,c(-52,-57,-109,-114,-258,-303,-309,-449)]
 
 #TF-IDF and latent semantic analysis with 6 components (the evaluation of the optimal number of
 # LSA component is in the notebook called "CV for LSA")
@@ -133,11 +130,13 @@ library(lsa)
 lsa.tfidf<-lsa(tfidf,dim=20)
 
 words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
-View(words.df)
 
 #Moving LSA to excel
+#LSA with documents
 write.table(words.df, file="LSA_6.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
+#LSA with words
 lsa_inter<-as.data.frame(as.matrix(lsa.tfidf$tk))
+lsa_inter<-lsa_inter[c(8,14,3,1,6)]
 write.table(lsa_inter, file="LSA_I2.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 #Implementing the logistic regression model
@@ -153,9 +152,10 @@ training
 
 #run logistic model on training
 trainData = cbind(label=data$over.b[training],words.df[training,])
-reg<-glm(label~V1+V4+V5+V6,data=trainData, family='binomial')
+reg<-glm(label~.,data=trainData, family='binomial')
 summary(reg)
 
+reg<-glm(label~.,data=trainData, family='binomial')
 #compute accuracy on validation set
 ValidData<-cbind(label=data$over.b[-training],words.df[-training,])
 pred<-predict(reg,newdata=ValidData,type='response')
@@ -229,7 +229,7 @@ mod_fit2 <- train(output~V2+V3+V8+V12+V13+V15+V17,data =K_Fold_Data,method = "gl
 mod_fit2$results
 View(mod_fit2$results)
 
- #Creating a ConfusionMatrix for interpreting the results
+#Creating a ConfusionMatrix for interpreting the results
 confusionMatrix(mod_fit$pred$pred, mod_fit$pred$obs)
 
 
@@ -251,7 +251,7 @@ barplot(counts, main="Model comparison",
 
 
 #using this code to create the df DataFrame to compare different numbers of LSA
-mod_fit <- train(output~V1,data =K_Fold_Data,met hod = "glm",trControl = ctrl, family="binomial")
+mod_fit <- train(output~V1,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
 df[1,]<- mod_fit$results[1,]
 mod_fit <- train(output~V1+V2,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
 df[2,]<- mod_fit$results[1,]
@@ -320,15 +320,15 @@ rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=74 , impor
 #rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
 rf.model
 #note on confusion matrix-> You have to load randomForest before launching r.model
-                            #rows are actual values and columns are predicted values
+#rows are actual values and columns are predicted values
 
 #measuring oob error rate to understand if tree number is correct
 oob.error.data<-data.frame(
   Trees=rep(1:nrow(rf.model$err.rate), times=3), 
   Type=rep(c("OOB", "0", "1"), each=nrow(rf.model$err.rate)),
   Error=c(rf.model$err.rate[,"OOB"],
-        rf.model$err.rate[,"0"],
-        rf.model$err.rate[,"1"]))
+          rf.model$err.rate[,"0"],
+          rf.model$err.rate[,"1"]))
 
 #plotting oob error rate
 library(ggplot2)
@@ -353,12 +353,3 @@ rf.model_cv <- train(y=rf.output_cv,x=rf.df,method = "rf",trControl = ctrl)
 
 variable.importance<-as.data.frame(importance(rf.model))
 variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),] 
-
-
-
-variab_imp<-as.data.frame(varImp(reg))
-variab_imp[,2]<-rownames(variab_imp)
-variab_imp<-variab_imp[,c("V2","Overall")]
-rownames(variab_imp)<-1:20
-colnames(variab_imp)[1]<-"Predictors"
-variab_imp<-variab_imp[order(variab_imp$Overall, decreasing =TRUE),]

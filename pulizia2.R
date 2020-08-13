@@ -15,7 +15,7 @@ pulizia2<-c("c_veri","c_isnt","c_con","c_i","c_netflix","c_ive","c_almost","c_ha
             "p_mster","p_ur","c_ur","c_yeah","p_yeah","c_ax","p_ax","p_becasu","c_becasu",
             "p_netlfix","c_piti","p_piti","p_dot","c_dot","c_ah","p_ah","c_yo","p_yo",
             "c_eggager","p_eggager","p_ya","c_accustom","p_accustom","p_devoid","c_devoid",
-            "p_outta","c_noy","p_noy","p_chao","c_chao","p_weve","c_weve","c_bye","p_bye","p_doest","c_doest","p_okish","p_thousand","c_thousand","c_xx","p_xx","c_bacaus","p_oneself","c_huh","p_huh")
+            "p_outta","c_noy","p_noy","p_chao","c_chao","p_weve","c_weve","c_bye","p_bye","p_doest","c_doest","p_okish","p_thousand","c_thousand","c_xx","p_xx","c_bacaus","p_oneself","c_huh","p_huh","c_realy","p_realy")
 corp <- tm_map(corp, removeWords, pulizia2)
 corp<-tm_map(corp, stripWhitespace)
 tdm<-TermDocumentMatrix(corp)
