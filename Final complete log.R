@@ -48,6 +48,8 @@ cons<-gsub("insufficiect","insufficient",cons)
 cons<-gsub("\\bmgt\\b","management",cons)
 cons<-gsub("WIshy washy","wishiwashy",cons)
 cons<-gsub("\\bmgmt\\b","management",cons)
+cons<-gsub("\\bfavorite\\b","favourite",cons)
+cons<-gsub("\\bmarketpay\\b","market pay",cons)
 
 pros<-gsub("Ç","c",pros)
 pros<-gsub("¸",",",pros)
@@ -71,6 +73,8 @@ pros<-gsub("\\bmgr\\b","manager",pros)
 pros<-gsub("\\bCluture\\b","culture",pros)
 pros<-gsub("\\bprettt\\b","pretty",pros)
 pros<-gsub("\\bmgmt\\b","management",pros)
+pros<-gsub("\\bfavorite\\b","favourite",pros)
+pros<-gsub("\\bmarketpay\\b","market pay",pros)
 
 #creating Corpus
 library(tm)
@@ -136,7 +140,7 @@ words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
 write.table(words.df, file="LSA_6.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 #LSA with words
 lsa_inter<-as.data.frame(as.matrix(lsa.tfidf$tk))
-lsa_inter<-lsa_inter[c(8,14,3,1,6)]
+lsa_inter<-lsa_inter[c(8,14,5,1,3)]
 write.table(lsa_inter, file="LSA_I2.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 #Implementing the logistic regression model
@@ -152,7 +156,7 @@ training
 
 #run logistic model on training
 trainData = cbind(label=data$over.b[training],words.df[training,])
-reg<-glm(label~.,data=trainData, family='binomial')
+reg<-glm(label~V8+V14+V5+V1+V3,data=trainData, family='binomial')
 summary(reg)
 
 reg<-glm(label~.,data=trainData, family='binomial')
@@ -225,7 +229,7 @@ mod_fit <- train(output~.,data =K_Fold_Data,method = "glm",trControl = ctrl, fam
 mod_fit$results
 View(mod_fit$results)
 
-mod_fit2 <- train(output~V2+V3+V8+V12+V13+V15+V17,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
+mod_fit2 <- train(output~V8+V14+V5+V1+V3,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
 mod_fit2$results
 View(mod_fit2$results)
 
@@ -233,22 +237,27 @@ View(mod_fit2$results)
 confusionMatrix(mod_fit$pred$pred, mod_fit$pred$obs)
 
 
-#Comparing two models with 4 and 6 components
+#Comparing two models with 5 and 20 components
 df2<-data.frame(matrix(nrow=2, ncol=19))
 df2[1,]<-mod_fit$results[1,]
 df2[2,]<-mod_fit2$results[1,]
 names(df2)<-colnames(mod_fit$results)
-df2[,1]<-c("4 components","6 components")
+df2[,1]<-c("20 components","5 components")
 colnames(df2)[1]<-"Model"
+modelcomp<-df2[,c(1,2,5,6)]
+
+df2[,-1]<-df2[,-1]*100
+df2<-as.numeric(df2[,1])
 
 write.table(df2, file="df2.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 # Grouped Bar Plot
-counts <- table(df2$Accuracy)
+counts <- table(df2)
 barplot(counts, main="Model comparison",
         xlab="parameter", col=c("darkblue","red"),
         legend = rownames(round(counts)), beside=TRUE, )
-
+barplot(counts, main="Car Distribution",
+        xlab="Number of Gears") 
 
 #using this code to create the df DataFrame to compare different numbers of LSA
 mod_fit <- train(output~V1,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")

@@ -2,7 +2,7 @@
 #x <- readLines("netflix.csv")
 data<- read.csv("netflix.csv", header =TRUE, sep=";")
 #Viewing complete dataset
-View(data)
+View(data$cons)
 #str(data)
 #Translating French observations
 levels(data$pros) <- c(levels(data$pros), "Pleasant Hobby Free choice Great quality Languages","Learn to work on pressure. Personal development, team spirit, enthusiasm")
