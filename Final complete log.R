@@ -3,7 +3,7 @@
 data<- read.csv("netflix.csv", header =TRUE, sep=";")
 #Viewing complete dataset
 View(data)
-#str(data)
+str(data)
 #Translating French observations
 levels(data$pros) <- c(levels(data$pros), "Pleasant Hobby Free choice Great quality Languages","Learn to work on pressure. Personal development, team spirit, enthusiasm")
 data[810,"pros"]<-"Pleasant Hobby Free choice Great quality Languages"
@@ -12,6 +12,8 @@ levels(data$cons) <- c(levels(data$cons), "I do not know it","Stimulate to do mu
 data[810,"cons"]<-"I do not know it"
 data[809,"cons"]<-"Stimulate to do much more than before"
 
+data<-data[c(-52,-57,-109,-114,-258,-303,-309,-449),]
+rownames(data) <- 1:nrow(data)
 #Separating text variables to other variables
 cons<-data$cons
 pros<-data$pros
@@ -125,9 +127,6 @@ tfidf<- weightTfIdf(tdm)
 #converting to dataframe
 tfidf_df<-as.data.frame(as.matrix(tfidf))
 
-#dropping empty documents
-tfidf_df<-tfidf_df[,c(-52,-57,-109,-114,-258,-303,-309,-449)]
-
 #TF-IDF and latent semantic analysis with 6 components (the evaluation of the optimal number of
 # LSA component is in the notebook called "CV for LSA")
 library(lsa)
@@ -140,8 +139,8 @@ words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
 write.table(words.df, file="LSA_6.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 #LSA with words
 lsa_inter<-as.data.frame(as.matrix(lsa.tfidf$tk))
-lsa_inter<-lsa_inter[c(8,14,5,1,3)]
-write.table(lsa_inter, file="LSA_I2.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
+lsa_inter<-lsa_inter[c(7,3,13,4,10,1)]
+write.table(lsa_inter, file="LSA_I3.csv", quote=F, sep=",", dec=".", na="NA", row.names=T, col.names=T)
 
 #Implementing the logistic regression model
 #aggiungo una colonna e rendo binaria la variabile overall rating
@@ -151,12 +150,12 @@ data$over.b<-ifelse(data$overall.ratings>3.5,1,0)
 summary(data$over.b)  
 
 #sample 60% training data
-training<-sample(c(1:810), 0.6*810)
+training<-sample(c(1:802), 0.6*802)
 training
 
 #run logistic model on training
 trainData = cbind(label=data$over.b[training],words.df[training,])
-reg<-glm(label~V8+V14+V5+V1+V3,data=trainData, family='binomial')
+reg<-glm(label~V7+V3+V13+V4+V10+V1,data=trainData, family='binomial')
 summary(reg)
 
 reg<-glm(label~.,data=trainData, family='binomial')
@@ -167,17 +166,12 @@ pred<-predict(reg,newdata=ValidData,type='response')
 #confusion matrix
 library(caret)
 
-pred_factor <- factor(ifelse(pred>0.5,1,0), levels = 1:323)
-pred_vector<-as.vector(pred_factor)
-pred_vector[is.na(pred_vector)] <- 0
-pred_factor<-as.factor(pred_vector)
+pred_factor <- factor(ifelse(pred>0.5,1,0))
 
-over.b_factor<-factor(data$over.b[-training], levels = 1:324)
-over.b_vector<-as.vector(over.b_factor)
-over.b_vector[is.na(over.b_vector)] <- 0
-over.b_factor<-as.factor(over.b_vector)
+over.b_factor<-factor(data$over.b[-training])
 
 CM<-confusionMatrix(pred_factor, over.b_factor)
+CM
 #F1 score form ConfusionMatrix
 CM$byClass["F1"]
 mean(data$over.b[-training])
@@ -229,7 +223,7 @@ mod_fit <- train(output~.,data =K_Fold_Data,method = "glm",trControl = ctrl, fam
 mod_fit$results
 View(mod_fit$results)
 
-mod_fit2 <- train(output~V8+V14+V5+V1+V3,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
+mod_fit2 <- train(output~V7+V3+V13+V4+V10+V1,data =K_Fold_Data,method = "glm",trControl = ctrl, family="binomial")
 mod_fit2$results
 View(mod_fit2$results)
 
@@ -324,7 +318,7 @@ rf.df<-as.data.frame(as.matrix(tfidf))
 rf.df<-as.data.frame(t(rf.df))
 rf.output<-as.factor(data$over.b)
 
-rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=74 , importance=TRUE)
+rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=66 , importance=TRUE)
 #another way of doing it
 #rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
 rf.model
