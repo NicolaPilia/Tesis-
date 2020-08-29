@@ -362,3 +362,29 @@ variab_imp<-variab_imp[,c("V2","Overall")]
 rownames(variab_imp)<-1:20
 colnames(variab_imp)[1]<-"Predictors"
 variab_imp<-variab_imp[order(variab_imp$Overall, decreasing =TRUE),]
+
+
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+library(reshape2)
+
+df3 <- data.frame(n_comp=c('20 components','5 components'),
+                 Accuracy=c(0.7754178,0.7716294),
+                 Sens=c(0.8006006,0.7783033),
+                 Spec=c(0.7548485,0.7663636))
+reshape2::melt(df3, id.vars = "n_comp") %>% 
+  mutate(n_comp = relevel(factor(n_comp), "5 components")) %>% 
+  ggplot(aes(x=variable, y=value, fill=n_comp, 
+             label = scales::percent(value, accuracy=.1), width=.6)) +
+  geom_bar(stat='identity', position=position_dodge2(width=.8, padding=.2)) +
+  geom_text(position = position_dodge(.6), vjust=-0.5, size=5) +
+  theme_minimal_hgrid()+
+  theme(legend.position = 'bottom', 
+        legend.title = element_blank(),
+        text = element_text(size = 18),
+        axis.text = element_text(size = 18),
+        plot.title = element_text(hjust = 0.5)) +
+  labs(x=NULL, y=NULL, title = "Model Comparison")+
+  coord_cartesian(ylim = c(.6, .85)) +
+  scale_fill_manual(values = c("#4472c4", "#eb7c31"))

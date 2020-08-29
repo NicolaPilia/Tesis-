@@ -79,7 +79,7 @@ View(tfidf$dimnames$Terms)
 #TF-IDF and latent semantic analysis with 6 components (the evaluation of the optimal number of
 # LSA component is in the notebook called "CV for LSA")
 library(lsa)
-lsa.tfidf<-lsa(tfidf,dim=6)
+lsa.tfidf<-lsa(tfidf,dim=20)
 
 words.df<-as.data.frame(as.matrix(lsa.tfidf$dk))
 View(words.df)
@@ -100,7 +100,7 @@ training
 
 #run logistic model on training
 trainData = cbind(label=data$over.b[training],words.df[training,])
-reg<-glm(label ~.,data=trainData, family='binomial')
+reg<-glm(label ~V1+V2+V3+V4+V5+V6,data=trainData, family='binomial')
 summary(reg)
 
 #compute accuracy on validation set
