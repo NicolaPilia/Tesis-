@@ -388,3 +388,5 @@ reshape2::melt(df3, id.vars = "n_comp") %>%
   labs(x=NULL, y=NULL, title = "Model Comparison")+
   coord_cartesian(ylim = c(.6, .85)) +
   scale_fill_manual(values = c("#4472c4", "#eb7c31"))
+
+

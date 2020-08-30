@@ -172,6 +172,7 @@ over.b_factor<-factor(data$over.b[-training])
 
 CM<-confusionMatrix(pred_factor, over.b_factor)
 CM
+CM$byClass["Sensitivity"]
 #F1 score form ConfusionMatrix
 CM$byClass["F1"]
 mean(data$over.b[-training])
@@ -318,7 +319,7 @@ rf.df<-as.data.frame(as.matrix(tfidf))
 rf.df<-as.data.frame(t(rf.df))
 rf.output<-as.factor(data$over.b)
 
-rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=66 , importance=TRUE)
+rf.model<-randomForest(y=rf.output[training],x=rf.df[training,], mtry=66 , importance=TRUE, localImp = TRUE)
 #another way of doing it
 #rf.model<-randomForest(y=rf.output,x=rf.df,subset = training, mtry=74 , ntree=500, importance=TRUE)
 rf.model
@@ -346,7 +347,7 @@ importance(rf.model)
 rf.ValidData<-rf.df[-training,]
 rf.pred<-predict(rf.model,newdata=rf.ValidData,type='response')
 rf.confmat<-confusionMatrix(rf.pred,rf.output[-training])
-
+rf.confmat
 #rf.ValidData2<-rf.df[training,]
 #rf.pred2<-predict(rf.model,newdata=rf.ValidData2,type='response')
 #rf.confmat2<-confusionMatrix(rf.pred2,rf.output[training])
@@ -355,4 +356,44 @@ rf.output_cv<-make.names(rf.output)
 rf.model_cv <- train(y=rf.output_cv,x=rf.df,method = "rf",trControl = ctrl)
 
 variable.importance<-as.data.frame(importance(rf.model))
-variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),] 
+variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),]
+
+#min depht distribution
+library(randomForestExplainer)
+min_depth_frame <- min_depth_distribution(rf.model)
+save(min_depth_frame, file = "min_depth_frame.rda")
+plot_min_depth_distribution(min_depth_frame)
+
+plot_min_depth_distribution(min_depth_frame, mean_sample = "all_trees", k = 10)
+
+#variable importance
+importance_frame <- measure_importance(rf.model)
+
+plot_multi_way_importance(importance_frame, size_measure = "no_of_nodes")
+
+plot_multi_way_importance(importance_frame, x_measure = "accuracy_decrease", y_measure = "gini_decrease", size_measure = "p_value", no_of_labels = 5)
+
+plot_multi_way_importance(importance_frame, x_measure = "accuracy_decrease", y_measure = "gini_decrease",  no_of_labels = 10)
+
+library(ggplot2)
+library(forcats)
+# Basic barplot
+variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),]
+mdg<-variable.importance[1:10,c(1,4)]
+mdg<-mdg[order(mdg$MeanDecreaseGini, decreasing = FALSE),]
+
+mdg_plot<-ggplot(data=mdg, x=rownames(mdg), y=mdg$MeanDecreaseGini ,aes(x=fct_inorder(rownames(mdg)),y=MeanDecreaseGini, label = MeanDecreaseGini)) +
+  geom_bar(stat="identity")
+mdg_plot
+mdg_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Gini") + geom_text(aes(label = round(MeanDecreaseGini, 1), hjust = -0.2)) + ylim(NA, 10)
+mdg_plot 
+
+variable.importance<-variable.importance[order(variable.importance$MeanDecreaseAccuracy, decreasing = TRUE),]
+mda<-variable.importance[1:10,c(1,3)]
+mda<-mda[order(mda$MeanDecreaseAccuracy, decreasing = FALSE),]
+
+mda_plot<-ggplot(data=mda, x=rownames(mda), y=mda$MeanDecreaseAccuracy ,aes(x=fct_inorder(rownames(mdg)),y=MeanDecreaseAccuracy, label = MeanDecreaseAccuracy)) +
+  geom_bar(stat="identity")
+mda_plot
+mda_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Accuracy") + geom_text(aes(label = round(MeanDecreaseAccuracy, 1), hjust = -0.2)) + ylim(NA, 16)
+
