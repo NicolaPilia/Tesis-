@@ -358,6 +358,7 @@ rf.model_cv <- train(y=rf.output_cv,x=rf.df,method = "rf",trControl = ctrl)
 variable.importance<-as.data.frame(importance(rf.model))
 variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),]
 
+
 #min depht distribution
 library(randomForestExplainer)
 min_depth_frame <- min_depth_distribution(rf.model)
@@ -368,6 +369,7 @@ plot_min_depth_distribution(min_depth_frame, mean_sample = "all_trees", k = 10)
 
 #variable importance
 importance_frame <- measure_importance(rf.model)
+summary(importance_frame$times_a_root)
 
 plot_multi_way_importance(importance_frame, size_measure = "no_of_nodes")
 
@@ -378,22 +380,37 @@ plot_multi_way_importance(importance_frame, x_measure = "accuracy_decrease", y_m
 library(ggplot2)
 library(forcats)
 # Basic barplot
-variable.importance<-variable.importance[order(variable.importance$MeanDecreaseGini, decreasing = TRUE),]
-mdg<-variable.importance[1:10,c(1,4)]
-mdg<-mdg[order(mdg$MeanDecreaseGini, decreasing = FALSE),]
+variable_importance<-importance_frame[order(importance_frame$accuracy_decrease, decreasing = TRUE),]
+mda<-variable_importance[1:10,c(1,4)]
+mda<-mda[order(mda$accuracy_decrease, decreasing = FALSE),]
+rownames(mda)<-mda$variable
 
-mdg_plot<-ggplot(data=mdg, x=rownames(mdg), y=mdg$MeanDecreaseGini ,aes(x=fct_inorder(rownames(mdg)),y=MeanDecreaseGini, label = MeanDecreaseGini)) +
-  geom_bar(stat="identity")
-mdg_plot
-mdg_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Gini") + geom_text(aes(label = round(MeanDecreaseGini, 1), hjust = -0.2)) + ylim(NA, 10)
-mdg_plot 
-
-variable.importance<-variable.importance[order(variable.importance$MeanDecreaseAccuracy, decreasing = TRUE),]
-mda<-variable.importance[1:10,c(1,3)]
-mda<-mda[order(mda$MeanDecreaseAccuracy, decreasing = FALSE),]
-
-mda_plot<-ggplot(data=mda, x=rownames(mda), y=mda$MeanDecreaseAccuracy ,aes(x=fct_inorder(rownames(mdg)),y=MeanDecreaseAccuracy, label = MeanDecreaseAccuracy)) +
+mda_plot<-ggplot(data=mda, x=mda$variable, y=mda$accuracy_decrease ,aes(x=fct_inorder(rownames(mda)),y=accuracy_decrease, label = accuracy_decrease)) +
   geom_bar(stat="identity")
 mda_plot
-mda_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Accuracy") + geom_text(aes(label = round(MeanDecreaseAccuracy, 1), hjust = -0.2)) + ylim(NA, 16)
+mda_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Accuracy") + geom_text(aes(label = round(accuracy_decrease, 3), hjust = -0.2)) + ylim(0, 0.025)
+mda_plot 
 
+variable_importance<-importance_frame[order(importance_frame$gini_decrease, decreasing = TRUE),]
+mdg<-variable_importance[1:10,c(1,5)]
+mdg<-mdg[order(mdg$gini_decrease, decreasing = FALSE),]
+rownames(mdg)<-mdg$variable
+
+mdg_plot<-ggplot(data=mdg, x=rownames(mdg), y=mda$gini_decrease ,aes(x=fct_inorder(rownames(mdg)),y=gini_decrease, label = gini_decrease)) +
+  geom_bar(stat="identity")
+mdg_plot
+mdg_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased Gini") + geom_text(aes(label = round(gini_decrease, 1), hjust = -0.2)) + ylim(NA, 16)
+
+plot_multi_way_importance(importance_frame, x_measure = "no_of_trees", y_measure = "times_a_root", size_measure = "p_value", no_of_labels = 5)
+
+FNR.var_imp<-variable.importance[order(variable.importance$"0", decreasing = TRUE),]
+FNR.var_imp<-FNR.var_imp[1:10,c(1,2)]
+FNR.var_imp[,2]<-rownames(FNR.var_imp)
+FNR.var_imp[,c(1,2)]<-FNR.var_imp[,c(2,1)]
+colnames(FNR.var_imp)<- c("names", "zero")
+FNR.var_imp<-FNR.var_imp[order(FNR.var_imp$zero, decreasing=FALSE),]
+
+FNR_plot<-ggplot(data=FNR.var_imp, x=rownames(FNR.var_imp), y=zero ,aes(x=fct_inorder(rownames(FNR.var_imp)),y=zero, label = zero)) +
+  geom_bar(stat="identity")
+FNR_plot
+FNR_plot + coord_flip()+ labs(x="Variabili", y="Mean Decreased FNR") + geom_text(aes(label = round(zero, 1), hjust = -0.2)) + ylim(0, 16)
