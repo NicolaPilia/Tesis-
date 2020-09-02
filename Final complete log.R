@@ -158,7 +158,33 @@ trainData = cbind(label=data$over.b[training],words.df[training,])
 reg<-glm(label~V7+V3+V13+V4+V10+V1,data=trainData, family='binomial')
 summary(reg)
 
-reg<-glm(label~.,data=trainData, family='binomial')
+1-pchisq((reg$null.deviance-reg$deviance), 
+df=(reg$df.null - reg$df.residual))
+
+
+var_imp<-varImp(reg)
+var_imp[,2]<-rownames(var_imp)
+var_imp<-var_imp[,c("V2","Overall")]
+var_imp<-var_imp[order(var_imp$Overall, decreasing = TRUE),]
+var_imp
+
+vs_reg<-glm(label~.,data=trainData, family='binomial')
+p_values<-as.data.frame(summary(vs_reg)$coefficients[,"Pr(>|z|)"])
+colnames(p_values)[1]<-"p_value"
+p_values[,2]<-rownames(p_values)
+rownames(p_values)<-1:21
+colnames(p_values)[2]<-"Numero componenti"
+p_values<-p_values[,c("Numero componenti","p_value")]
+p_values<-p_values[order(p_values$`p_value`, decreasing = FALSE),]
+
+variab_imp<-as.data.frame(summary(vs_reg)$coefficients[,"Pr(>|z|)"])
+variab_imp[,2]<-rownames(variab_imp)
+variab_imp<-variab_imp[,c("V2","Overall")]
+rownames(variab_imp)<-1:20
+colnames(variab_imp)[1]<-"Predictors"
+variab_imp<-variab_imp[order(variab_imp$Overall, decreasing =TRUE),]
+
+
 #compute accuracy on validation set
 ValidData<-cbind(label=data$over.b[-training],words.df[-training,])
 pred<-predict(reg,newdata=ValidData,type='response')
